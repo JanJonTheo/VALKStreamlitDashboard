@@ -1,6 +1,6 @@
-# Fork of the VALK Streamlit Dashboard for CIU
+![VALT Logo](assets/VALT_logo.jpg)
 
-![CIU Logo](assets/CIU.png)
+# VALK Streamlit Dashboard
 
 ## Project Description
 
@@ -60,6 +60,8 @@ It can be easily adapted to other factions or groups by changing the API endpoin
 
 ## Credits
 This project was developed by Cmdr JanJonTheo.
+
+Docker Compose setup by daniele-liprandi
 
 ## Disclaimer
 This project is not affiliated with or endorsed by Frontier Developments Inc., the creators of Elite Dangerous.
