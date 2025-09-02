@@ -1,6 +1,6 @@
-![VALT Logo](assets/VALT_logo.jpg)
+# Fork of the VALK Streamlit Dashboard for CIU
 
-# VALK Streamlit Dashboard
+![CIU Logo](assets/CIU.png)
 
 ## Project Description
 
@@ -42,9 +42,9 @@ It can be easily adapted to other factions or groups by changing the API endpoin
    Copy the `.env_template` file to `.env` and adjust the values:
 
    ```env
-   API_KEY=your_api_key_here
+   API_KEY=your_api_key_here_same_as_flask_api
    API_VERSION=1.6.0
-   API_BASE=http://your_api_base_url_here
+   API_BASE=url_of_the_flask_app/api/
    ```
 
 2. **Start the dashboard**
