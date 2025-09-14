@@ -325,8 +325,8 @@ def inject_aligned_rows_css(col_px: int = 260, chk_px: int = 180, gap_rem: float
     st.markdown(f"""
     <style>
       :root {{
-        --valk-col: {col_px}px;
-        --valk-chk: {chk_px}px;
+        --valk-col: min({col_px}px, 20vw);
+        --valk-chk: min({chk_px}px, 15vw);
         --valk-gap: {gap_rem}rem;
       }}
 
@@ -338,16 +338,33 @@ def inject_aligned_rows_css(col_px: int = 260, chk_px: int = 180, gap_rem: float
       }}
       label {{ margin-bottom: .18rem !important; }}
 
-      /* Ein gemeinsames Grid-Template für alle drei Zeilen:
-         5 feste Felder + 1 schmaler Checkbox-Slot + flex-Füller */
-      #sys-row + div[data-testid="stHorizontalBlock"],
-      #fac-row + div[data-testid="stHorizontalBlock"],
-      #pow-row + div[data-testid="stHorizontalBlock"] {{
-        display: grid !important;
-        grid-template-columns: repeat(5, var(--valk-col)) var(--valk-chk) 1fr !important;
-        gap: var(--valk-gap) !important;
-        align-items: end !important;
-        justify-content: start !important;
+      /* Responsive grid templates - stack on small screens */
+      @media (max-width: 1200px) {{
+        #sys-row + div[data-testid="stHorizontalBlock"],
+        #fac-row + div[data-testid="stHorizontalBlock"],
+        #pow-row + div[data-testid="stHorizontalBlock"] {{
+          display: flex !important;
+          flex-direction: column !important;
+          gap: var(--valk-gap) !important;
+        }}
+        #sys-row + div[data-testid="stHorizontalBlock"] > div,
+        #fac-row + div[data-testid="stHorizontalBlock"] > div,
+        #pow-row + div[data-testid="stHorizontalBlock"] > div {{
+          width: 100% !important;
+          max-width: 400px !important;
+        }}
+      }}
+
+      /* Wide screen grid layout */
+      @media (min-width: 1201px) {{
+        #sys-row + div[data-testid="stHorizontalBlock"],
+        #fac-row + div[data-testid="stHorizontalBlock"],
+        #pow-row + div[data-testid="stHorizontalBlock"] {{
+          display: grid !important;
+          grid-template-columns: repeat(3, 1fr) !important;
+          gap: var(--valk-gap) !important;
+          align-items: end !important;
+        }}
       }}
     </style>
     """, unsafe_allow_html=True)
@@ -420,7 +437,8 @@ def inject_compact_filter_css(width_px: int = 260):
     st.markdown(f"""
     <style>
       :root {{
-        --valk-filter-width: {width_px}px;
+        --valk-filter-width: min({width_px}px, 90vw);
+        --valk-filter-width-mobile: min(300px, 95vw);
       }}
 
       /* ---------- kompakter Expander ---------- */
@@ -432,59 +450,98 @@ def inject_compact_filter_css(width_px: int = 260):
         padding: .35rem .25rem .25rem .25rem !important;
       }}
 
-      /* ---------- einheitliche Breite für alle Controls ---------- */
-      /* Widgets sollen nicht die volle Spaltenbreite einnehmen */
-      [data-testid="stSelectbox"],
-      [data-testid="stMultiSelect"],
-      [data-testid="stNumberInput"],
-      [data-testid="stTextInput"],
-      [data-testid="stDateInput"] {{
-        display: inline-block !important;
-        flex: 0 0 auto !important;
+      /* ---------- Responsive Widget-Breiten ---------- */
+      @media (max-width: 768px) {{
+        :root {{
+          --valk-filter-width: var(--valk-filter-width-mobile);
+        }}
+        
+        /* Auf kleinen Bildschirmen: volle Breite nutzen */
+        [data-testid="stSelectbox"],
+        [data-testid="stMultiSelect"],
+        [data-testid="stNumberInput"],
+        [data-testid="stTextInput"],
+        [data-testid="stDateInput"] {{
+          width: 100% !important;
+        }}
+        
+        [data-testid="stSelectbox"] > div,
+        [data-testid="stMultiSelect"] > div,
+        [data-testid="stNumberInput"] > div,
+        [data-testid="stTextInput"] > div,
+        [data-testid="stDateInput"] > div {{
+          width: 100% !important;
+          max-width: 100% !important;
+          min-width: auto !important;
+        }}
       }}
 
-      /* 1) Erste Wrapper-Ebene (Streamlit um das Widget) */
-      [data-testid="stSelectbox"] > div,
-      [data-testid="stMultiSelect"] > div,
-      [data-testid="stNumberInput"] > div,
-      [data-testid="stTextInput"] > div,
-      [data-testid="stDateInput"] > div {{
-        width: var(--valk-filter-width) !important;
-        max-width: var(--valk-filter-width) !important;
-        min-width: var(--valk-filter-width) !important;
-      }}
+      @media (min-width: 769px) {{
+        /* Desktop: feste Breiten beibehalten */
+        [data-testid="stSelectbox"],
+        [data-testid="stMultiSelect"],
+        [data-testid="stNumberInput"],
+        [data-testid="stTextInput"],
+        [data-testid="stDateInput"] {{
+          display: inline-block !important;
+          flex: 0 0 auto !important;
+        }}
 
-      /* 2) Nächste Ebene im Select */
-      [data-testid="stSelectbox"] > div > div,
-      [data-testid="stMultiSelect"] > div > div {{
-        width: var(--valk-filter-width) !important;
-        max-width: var(--valk-filter-width) !important;
-        min-width: var(--valk-filter-width) !important;
-      }}
+        /* 1) Erste Wrapper-Ebene (Streamlit um das Widget) */
+        [data-testid="stSelectbox"] > div,
+        [data-testid="stMultiSelect"] > div,
+        [data-testid="stNumberInput"] > div,
+        [data-testid="stTextInput"] > div,
+        [data-testid="stDateInput"] > div {{
+          width: var(--valk-filter-width) !important;
+          max-width: var(--valk-filter-width) !important;
+          min-width: var(--valk-filter-width) !important;
+        }}
 
-      /* 3) BaseWeb/React-Select Container selbst */
-      [data-testid="stSelectbox"] div[data-baseweb="select"],
-      [data-testid="stMultiSelect"] div[data-baseweb="select"],
-      [data-testid="stSelectbox"] div[role="combobox"],
-      [data-testid="stMultiSelect"] div[role="combobox"] {{
-        width: var(--valk-filter-width) !important;
-        max-width: var(--valk-filter-width) !important;
-        min-width: var(--valk-filter-width) !important;
-      }}
+        /* 2) Nächste Ebene im Select */
+        [data-testid="stSelectbox"] > div > div,
+        [data-testid="stMultiSelect"] > div > div {{
+          width: var(--valk-filter-width) !important;
+          max-width: var(--valk-filter-width) !important;
+          min-width: var(--valk-filter-width) !important;
+        }}
 
-      /* 4) Inputs direkt */
-      [data-testid="stNumberInput"] input,
-      [data-testid="stTextInput"] input {{
-        width: var(--valk-filter-width) !important;
-        max-width: var(--valk-filter-width) !important;
-        min-width: var(--valk-filter-width) !important;
+        /* 3) BaseWeb/React-Select Container selbst */
+        [data-testid="stSelectbox"] div[data-baseweb="select"],
+        [data-testid="stMultiSelect"] div[data-baseweb="select"],
+        [data-testid="stSelectbox"] div[role="combobox"],
+        [data-testid="stMultiSelect"] div[role="combobox"] {{
+          width: var(--valk-filter-width) !important;
+          max-width: var(--valk-filter-width) !important;
+          min-width: var(--valk-filter-width) !important;
+        }}
+
+        /* 4) Inputs direkt */
+        [data-testid="stNumberInput"] input,
+        [data-testid="stTextInput"] input {{
+          width: var(--valk-filter-width) !important;
+          max-width: var(--valk-filter-width) !important;
+          min-width: var(--valk-filter-width) !important;
+        }}
       }}
 
       /* Labels enger (mehr vertikale Dichte) */
       label {{ margin-bottom: .2rem !important; }}
 
-      /* kompakte Button-Reihe */
-      .btn-row > div {{ display:flex; gap:.5rem; align-items:center; }}
+      /* kompakte Button-Reihe - responsive */
+      .btn-row > div {{ 
+        display: flex !important; 
+        gap: .5rem !important; 
+        align-items: center !important; 
+        flex-wrap: wrap !important;
+      }}
+      
+      @media (max-width: 480px) {{
+        .btn-row > div {{
+          flex-direction: column !important;
+          align-items: stretch !important;
+        }}
+      }}
     </style>
     """, unsafe_allow_html=True)
 
@@ -799,8 +856,8 @@ def render():
             # Marker für das gemeinsame Grid (ID ändern!)
             st.markdown('<span id="sys-row"></span>', unsafe_allow_html=True)
 
-            # 7 Columns laut Grid: 5 Felder + Checkbox-Slot + Filler
-            sys_c1, sys_c2, sys_c3, sys_c4, sys_c5, sys_c6, _ = st.columns(7)
+            # Responsive columns: 3 on desktop, 1 on mobile
+            sys_c1, sys_c2, sys_c3 = st.columns(3)
 
             with sys_c1:
                 system_name = st.selectbox(
@@ -818,7 +875,6 @@ def render():
                 )
             with sys_c3:
                 has_conflict = st.checkbox("Has Conflict", value=False, key="has_conflict_filter")
-            # sys_c4/5 frei, sys_c6 frei (Checkbox-Slot) -> hält das Raster
 
             # Ableiten min/max + evtl. Custom
             pop_min, pop_max = POP_PRESETS[population_preset]
@@ -848,7 +904,10 @@ def render():
         # =========================
         with st.expander("Faction", expanded=False):
             st.markdown('<span id="fac-row"></span>', unsafe_allow_html=True)
-            fac_c1, fac_c2, fac_c3, fac_c4, fac_c5, fac_c6, _ = st.columns(7)
+            # First row: 3 main filters
+            fac_c1, fac_c2, fac_c3 = st.columns(3)
+            # Second row: 2 more filters + checkbox
+            fac_c4, fac_c5, fac_c6 = st.columns(3)
 
             with fac_c1:
                 cur = st.session_state.get("faction_filter", "")
@@ -887,7 +946,7 @@ def render():
         # =========================
         with st.expander("Power", expanded=False):
             st.markdown('<span id="pow-row"></span>', unsafe_allow_html=True)
-            pow_c1, pow_c2, pow_c3, pow_c4, pow_c5, pow_c6, _ = st.columns(7)
+            pow_c1, pow_c2, pow_c3 = st.columns(3)
 
             with pow_c1:
                 cur = st.session_state.get("controlling_power_filter", "")
@@ -905,7 +964,6 @@ def render():
                     [""] + ["Unoccupied", "Fortified", "Exploited", "Stronghold"],
                     key="powerplay_state_filter"
                 )
-            # pow_c4/5 frei, pow_c6 frei (Checkbox-Slot) -> hält das Raster
 
         # =========================
         # Parameter zusammenstellen
@@ -1040,10 +1098,10 @@ def render():
 
                 styled = (
                     df.style
-                    .applymap(style_state, subset=["State"])
-                    .applymap(style_states_cell, subset=["Active States"])
-                    .applymap(style_states_cell, subset=["Pending"])
-                    .applymap(style_states_cell, subset=["Recovering"])
+                    .map(style_state, subset=["State"])
+                    .map(style_states_cell, subset=["Active States"])
+                    .map(style_states_cell, subset=["Pending"])
+                    .map(style_states_cell, subset=["Recovering"])
                     .format({
                         "Influence": fmt_pct,
                         "State": fmt_state_text,
