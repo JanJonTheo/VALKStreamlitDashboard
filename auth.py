@@ -5,7 +5,8 @@ import streamlit as st
 
 load_dotenv()
 
-API_BASE = os.getenv("API_BASE")
+# API_BASE z.B. "http://127.0.0.1:5000/api" oder ohne /api je nach Deployment
+API_BASE = os.getenv("API_BASE", "").rstrip("/")
 
 def get_api_key(api_key=None):
     # Verwende explizit übergebenen API-Key oder den aus der Session
@@ -16,25 +17,30 @@ def get_api_key(api_key=None):
     return None
 
 def verify_user(username, password, api_key=None):
+    """
+    Ruft die Login-Route auf und gibt die JSON-Response des Backends unverändert zurück.
+    Erwartete Felder u.a.: faction_logo, faction_name, tenant_name, username, is_admin, id
+    """
     headers = {}
     key = get_api_key(api_key)
     if key:
-        headers["apikey"] = key
+        headers["apikey"] = key  # optional; Backend-/Proxy-Setups akzeptieren das idR.
     try:
-        r = requests.post(f"{API_BASE}/login", json={"username": username, "password": password}, headers=headers)
+        # Unterstützt beide Varianten: mit /api oder ohne (API_BASE flexibel halten)
+        url = f"{API_BASE}/login" if API_BASE.endswith("/api") else f"{API_BASE}/api/login"
+        r = requests.post(url, json={"username": username, "password": password}, headers=headers, timeout=15)
         if r.status_code == 200:
-            # Die Response enthält tenant_name, username, etc.
             return r.json()
         else:
-            print(r.status_code)
-            print(r.text)
+            # Für Diagnose in der Console hilfreich
+            print("Login failed:", r.status_code, r.text)
         return None
-    except Exception:
+    except Exception as ex:
+        print("Login exception:", ex)
         return None
 
 def user_has_access(user, page, api_key=None):
-    # Optional: API-Key für weitere API-Requests verwenden
+    # Optional: Page-spezifische Rechte per API prüfen
     if user.get("is_admin"):
         return True
-    # Add page-specific permission check here if needed via API
     return True
